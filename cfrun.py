@@ -1,11 +1,16 @@
+import argparse
 from collections import namedtuple
 from pathlib import Path
 import re
 import subprocess
 import sys
+import time
 
 from bs4 import BeautifulSoup
 from requests import get
+
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 languages = dict(
     cpp=lambda src: [
@@ -22,12 +27,15 @@ languages = dict(
 
 Test = namedtuple('Test', 'name input output')
 
+def is_file_type_known(path):
+    return Path(path).suffix[1:] in languages
+
 def get_commands(source_path):
     commands = languages[Path(source_path).suffix[1:]]
     if callable(commands):
         return commands(Path(source_path))
     elif isinstance(commands, str):
-        return (commands + ' ' + source_path, None)
+        return (commands + ' ' + str(source_path), None)
 
 def get_problem_url(source_path):
     full_path = str(Path(source_path).absolute())
@@ -110,6 +118,51 @@ def run_tests(source_path):
             print(test.output)
             print("Полученный ответ:")
             print(output)
+            break
+    return True
+
+def is_ignored(path):
+    return path.name.startswith('.') or '#' in path.name
+
+def handle_file_change(message, path):
+    path = Path(path)
+    if not path.is_absolute:
+        path = path.relative_to('.')
+    if not is_ignored(path) and is_file_type_known(path):
+        print(f"{message} файл {path}")
+        run_tests(path)
+
+class Watcher(FileSystemEventHandler):
+    def on_created(self, event):
+        handle_file_change("Создан", event.src_path)
+
+    def on_modified(self, event):
+        handle_file_change("Изменён", event.src_path)
+
+    def on_moved(self, event):
+        handle_file_change("Переремещён", event.dest_path)
+
+def watch(path):
+    print(f"Слежу за изменениями в {path}")
+    observer = Observer()
+    observer.schedule(Watcher(), path=path, recursive=True)
+    observer.start()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
 
 def main():
-    run_tests(sys.argv[1])
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('path', nargs='?', default='.')
+    argparser.add_argument('-w', '--watch', action='store_true')
+    args = argparser.parse_args()
+    if args.watch:
+        watch(args.path)
+    else:
+        if is_file_type_known(args.path):
+            run_tests(args.path)
+        else:
+            print(f"Не знаю, что делать с файлом такого типа: {args.path}")

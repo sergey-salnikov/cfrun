@@ -14,6 +14,7 @@ setup(
     install_requires=[
         'bs4',
         'requests',
+        'watchdog',
     ],
     entry_points={
         'console_scripts': [
