@@ -94,10 +94,11 @@ def get_tests(source_path):
 def run_tests(source_path):
     run_cmd, compile_cmd = get_commands(source_path)
     if compile_cmd:
-        print(f"Компилирую: {compile_cmd}", end=": ")
+        print(f"Компилирую: {compile_cmd}")
         sys.stdout.flush()
-        if subprocess.run(compile_cmd.split()).returncode == 0:
-            print("OK")
+        if subprocess.run(compile_cmd.split()).returncode != 0:
+            print(f"Ошибка компиляции ({compile_cmd})")
+            return
     print(f"Запускаю: {run_cmd}")
     for test in get_tests(source_path):
         print(test.name, end=": ")
