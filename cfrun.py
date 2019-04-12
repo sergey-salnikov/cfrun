@@ -61,7 +61,7 @@ def read_tests(test_path):
             for line in test_file:
                 if line.startswith('### '):
                     if name:
-                        tests.append(Test(name, input, output))
+                        tests.append(Test(name, input.strip(), output.strip()))
                     name = line[4:].strip()
                     in_output = False
                     input = output = ''
