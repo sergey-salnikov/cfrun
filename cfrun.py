@@ -13,9 +13,21 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 languages = dict(
+    c=lambda src: [
+        f"./{src.with_suffix('')}",
+        f"gcc --std=gnu11 -lm -o {src.with_suffix('')} {src}",
+    ],
     cpp=lambda src: [
         f"./{src.with_suffix('')}",
         f"g++ {src} -lm -o {src.with_suffix('')}",
+    ],
+    cs=lambda src: [
+        f"./{src.with_suffix('.exe')}",
+        f"mcs {src}",
+    ],
+    d=lambda src: [
+        f"./{src.with_suffix('')}",
+        f"dmd {src}",
     ],
     php='php',
     py='python3',
