@@ -52,7 +52,7 @@ def get_commands(source_path):
 def get_problem_url(source_path):
     full_path = str(Path(source_path).absolute())
     contest = re.findall(r'\d{2,}', full_path)[-1]
-    problem = re.findall(r'[^A-Za-z][A-Za-z][^A-Za-z]', full_path)[-1][1].upper()
+    problem = re.findall(r'[^A-Za-z][A-Za-z][0-9]?[^A-Za-z]', full_path)[-1][1:-1].upper()
     return f"https://codeforces.com/contest/{contest}/problem/{problem}"
 
 def scrape_samples(url):
