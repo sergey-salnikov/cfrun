@@ -14,23 +14,29 @@ from watchdog.events import FileSystemEventHandler
 
 languages = dict(
     c=lambda src: [
-        f"./{src.with_suffix('')}",
+        f"{src.with_suffix('')}",
         f"gcc --std=gnu11 -lm -o {src.with_suffix('')} {src}",
     ],
     cpp=lambda src: [
-        f"./{src.with_suffix('')}",
+        f"{src.with_suffix('')}",
         f"g++ {src} -lm -o {src.with_suffix('')}",
     ],
     cs=lambda src: [
-        f"./{src.with_suffix('.exe')}",
+        f"{src.with_suffix('.exe')}",
         f"mcs {src}",
     ],
     d=lambda src: [
-        f"./{src.with_suffix('')}",
+        f"{src.with_suffix('')}",
         f"dmd {src}",
+    ],
+    js='node',
+    pas=lambda src: [
+        f"{src.with_suffix('')}",
+        f"fpc {src}",
     ],
     php='php',
     py='python3',
+    rb='ruby',
     scala=lambda src: [
         f"scala {src.with_suffix('')}",
         f"scalac {src}",
