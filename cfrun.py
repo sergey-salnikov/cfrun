@@ -30,6 +30,10 @@ languages = dict(
         f"dmd {src}",
     ],
     js='node',
+    kt=lambda src: [
+        f"java -jar {src.with_suffix('.jar')}",
+        f"kotlinc {src} -include-runtime -d {src.with_suffix('.jar')}",
+    ],
     pas=lambda src: [
         f"{src.with_suffix('')}",
         f"fpc {src}",
