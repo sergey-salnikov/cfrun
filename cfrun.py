@@ -29,10 +29,22 @@ languages = dict(
         f"{src.with_suffix('')}",
         f"dmd {src}",
     ],
+    hs=lambda src: [
+        f"{src.with_suffix('')}",
+        f"ghc {src}",
+    ],
+    java=lambda src: [
+        f"java {src.with_suffix('')}",
+        f"javac {src}",
+    ],
     js='node',
     kt=lambda src: [
         f"java -jar {src.with_suffix('.jar')}",
         f"kotlinc {src} -include-runtime -d {src.with_suffix('.jar')}",
+    ],
+    ml=lambda src: [
+        f"{src.with_suffix('')}",
+        f"ocamlopt -w -8 nums.cmxa str.cmxa -o {src.with_suffix('')} {src}",
     ],
     pas=lambda src: [
         f"{src.with_suffix('')}",
