@@ -19,7 +19,7 @@ languages = dict(
     ],
     cpp=lambda src: [
         f"{src.with_suffix('')}",
-        f"g++ {src} -lm -o {src.with_suffix('')}",
+        f"g++ --std=gnu++17 {src} -lm -o {src.with_suffix('')}",
     ],
     cs=lambda src: [
         f"{src.with_suffix('.exe')}",
