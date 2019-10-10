@@ -116,9 +116,17 @@ def get_tests(source_path):
     test_path = Path(source_path).with_suffix('.test')
     tests = read_tests(test_path)
     if tests is None:
-        url = get_problem_url(source_path)
+        try:
+            url = get_problem_url(source_path)
+        except:
+            print("Не установил соответствие с контестом/задачей")
+            return None
         print(f"Скачиваю примеры с {url}")
-        tests = scrape_samples(url)
+        try:
+            tests = scrape_samples(url)
+        except:
+            print("Не сумел загрузить примеры")
+            return None
         print(f"Ок, загрузил {len(tests)} примеров, записываю в {test_path}")
         save_tests(test_path, tests)
     else:
@@ -134,26 +142,30 @@ def run_tests(source_path):
             print(f"Ошибка компиляции ({compile_cmd})")
             return
     print(f"Запускаю: {run_cmd}")
-    for test in get_tests(source_path):
-        print(test.name, end=": ")
-        sys.stdout.flush()
-        result = subprocess.run(
-            run_cmd.split(),
-            input=test.input,
-            stdout=subprocess.PIPE,
-            encoding='utf-8',
-            timeout=2,
-        )
-        output = result.stdout.strip()
-        if output == test.output:
-            print("OK")
-        else:
-            print("ответ не совпал")
-            print("Ожидаемый ответ:")
-            print(test.output)
-            print("Полученный ответ:")
-            print(output)
-            break
+    tests = get_tests(source_path)
+    if tests:
+        for test in tests:
+            print(test.name, end=": ")
+            sys.stdout.flush()
+            result = subprocess.run(
+                run_cmd.split(),
+                input=test.input,
+                stdout=subprocess.PIPE,
+                encoding='utf-8',
+                timeout=2,
+            )
+            output = result.stdout.strip()
+            if output == test.output:
+                print("OK")
+            else:
+                print("ответ не совпал")
+                print("Ожидаемый ответ:")
+                print(test.output)
+                print("Полученный ответ:")
+                print(output)
+                break
+    else:
+        subprocess.run(run_cmd.split())
     return True
 
 def is_ignored(path):
