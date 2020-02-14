@@ -8,9 +8,13 @@ import time
 
 from bs4 import BeautifulSoup
 from requests import get
+import requests_cache
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+
+APP_NAME = 'cfrun'
+CACHE_PATH = Path.home() / '.cache' / APP_NAME
 
 languages = dict(
     c=lambda src: [
@@ -78,59 +82,24 @@ def get_problem_url(source_path):
     return f"https://codeforces.com/contest/{contest}/problem/{problem}"
 
 def scrape_samples(url):
+    requests_cache.install_cache(str(CACHE_PATH))
     soup = BeautifulSoup(get(url).content, features="html.parser")
     blocks = [div.pre.text.strip() for div in soup.find('div', 'sample-test')]
     return [Test(f"Пример {i+1}", blocks[2*i], blocks[2*i+1]) for i in range(0, len(blocks)//2)]
 
-def save_tests(test_path, tests):
-    with test_path.open('w') as test_file:
-        for test in tests:
-            test_file.write(f"### {test.name}\n{test.input}\n# вывод\n{test.output}\n\n")
-
-def read_tests(test_path):
-    try:
-        tests = []
-        name = input = output = ''
-        with test_path.open() as test_file:
-            for line in test_file:
-                if line.startswith('### '):
-                    if name:
-                        tests.append(Test(name, input.strip(), output.strip()))
-                    name = line[4:].strip()
-                    in_output = False
-                    input = output = ''
-                elif line.startswith('# вывод'):
-                    in_output = True
-                elif name and not line.startswith('#'):
-                    if in_output:
-                        output += line
-                    else:
-                        input += line
-            if name:
-                tests.append(Test(name, input.strip(), output.strip()))
-        return tests
-    except FileNotFoundError:
-        return None
-
 def get_tests(source_path):
-    test_path = Path(source_path).with_suffix('.test')
-    tests = read_tests(test_path)
-    if tests is None:
-        try:
-            url = get_problem_url(source_path)
-        except:
-            print("Не установил соответствие с контестом/задачей")
-            return None
-        print(f"Скачиваю примеры с {url}")
-        try:
-            tests = scrape_samples(url)
-        except:
-            print("Не сумел загрузить примеры")
-            return None
-        print(f"Ок, загрузил {len(tests)} примеров, записываю в {test_path}")
-        save_tests(test_path, tests)
-    else:
-        print(f"Использую тесты из файла {test_path}")
+    try:
+        url = get_problem_url(source_path)
+    except:
+        print("Не установил соответствие с контестом/задачей")
+        return None
+    print(f"Скачиваю примеры с {url}")
+    try:
+        tests = scrape_samples(url)
+    except:
+        print("Не сумел загрузить примеры")
+        return None
+    print(f"Ок, загрузил {len(tests)} примеров")
     return tests
 
 def run_tests(source_path):

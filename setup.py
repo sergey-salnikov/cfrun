@@ -14,6 +14,7 @@ setup(
     install_requires=[
         'bs4',
         'requests',
+        'requests_cache',
         'watchdog',
     ],
     entry_points={
