@@ -84,7 +84,7 @@ def get_problem_url(source_path):
 def scrape_samples(url):
     requests_cache.install_cache(str(CACHE_PATH))
     soup = BeautifulSoup(get(url).content, features="html.parser")
-    blocks = [div.pre.text.strip() for div in soup.find('div', 'sample-test')]
+    blocks = [pre.text.strip() for pre in soup.find('div', 'sample-test').find_all('pre')]
     return [Test(f"Пример {i+1}", blocks[2*i], blocks[2*i+1]) for i in range(0, len(blocks)//2)]
 
 def get_tests(source_path):
