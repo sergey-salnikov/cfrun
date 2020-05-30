@@ -6,6 +6,7 @@ import subprocess
 import sys
 import time
 
+import browser_cookie3
 from bs4 import BeautifulSoup
 from requests import get
 import requests_cache
@@ -77,14 +78,20 @@ def get_commands(source_path):
 
 def get_problem_url(source_path):
     full_path = str(Path(source_path).absolute())
-    contest = re.findall(r'\d{2,}', full_path)[-1]
     problem = re.findall(r'[^A-Za-z][A-Za-z][0-9]?[^A-Za-z]', full_path)[-1][1:-1].upper()
-    return f"https://codeforces.com/contest/{contest}/problem/{problem}"
+    try:
+        dot_contest = Path(source_path).parent / '.contest'
+        contest_url = dot_contest.open().read().strip()
+    except:
+        contest = re.findall(r'\d{2,}', full_path)[-1]
+        contest_url = f"https://codeforces.com/contest/{contest}/problem/%s/"
+    return contest_url % (problem,)
 
 def scrape_samples(url):
     requests_cache.install_cache(str(CACHE_PATH))
-    soup = BeautifulSoup(get(url).content, features="html.parser")
-    blocks = [pre.text.strip() for pre in soup.find('div', 'sample-test').find_all('pre')]
+    cookies = browser_cookie3.firefox()
+    soup = BeautifulSoup(get(url, cookies=cookies).content, features="html.parser")
+    blocks = [pre.text.strip() for pre in soup.find_all('pre')]
     return [Test(f"Пример {i+1}", blocks[2*i], blocks[2*i+1]) for i in range(0, len(blocks)//2)]
 
 def get_tests(source_path):

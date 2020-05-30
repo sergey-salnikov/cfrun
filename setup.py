@@ -12,6 +12,7 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     install_requires=[
+        'browser-cookie3',
         'bs4',
         'requests',
         'requests_cache',
