@@ -141,7 +141,6 @@ def run_tests(source_path):
                 print(test.output)
                 print("Полученный ответ:")
                 print(output)
-                break
     else:
         subprocess.run(run_cmd.split())
     return True
