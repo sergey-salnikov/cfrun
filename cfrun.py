@@ -34,6 +34,7 @@ languages = dict(
         f"{src.with_suffix('')}",
         f"dmd {src}",
     ],
+    jl='julia',
     hs=lambda src: [
         f"{src.with_suffix('')}",
         f"ghc {src}",
@@ -56,6 +57,7 @@ languages = dict(
         f"fpc {src}",
     ],
     php='php',
+    pl='perl',
     py='python3',
     rb='ruby',
     scala=lambda src: [
