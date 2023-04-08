@@ -92,13 +92,20 @@ def get_problem_url(source_path):
 def normalize_ws(text: str):
     return "\n".join(line.strip() for line in text.strip().split("\n"))
 
+def get_block_text(block):
+    if block.find('div'):
+        text = "\n".join(div.text for div in block.find_all('div'))
+    else:
+        text = block.text
+    return normalize_ws(text)
+
 def scrape_samples(url):
     requests_cache.install_cache(str(CACHE_PATH))
     cookies = browser_cookie3.firefox()
     soup = BeautifulSoup(get(url, cookies=cookies).content, features="html.parser")
     blocks = list(soup.find_all('pre'))
-    inputs = ["\n".join(div.text for div in block.find_all('div')) for block in blocks[::2]]
-    outputs = [normalize_ws(block.text) for block in blocks[1::2]]
+    inputs = [get_block_text(block) for block in blocks[::2]]
+    outputs = [get_block_text(block) for block in blocks[1::2]]
     return [Test(f"Пример {i+1}", inputs[i], outputs[i]) for i in range(len(inputs))]
 
 def get_tests(source_path):
