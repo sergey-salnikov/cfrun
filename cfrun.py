@@ -58,7 +58,7 @@ languages = dict(
     ],
     php='php',
     pl='perl',
-    py='python3',
+    py='pypy3',
     rb='ruby',
     scala=lambda src: [
         f"scala {src.with_suffix('')}",
