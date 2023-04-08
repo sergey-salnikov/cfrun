@@ -89,13 +89,16 @@ def get_problem_url(source_path):
         contest_url = f"https://codeforces.com/contest/{contest}/problem/%s/"
     return contest_url % (problem,)
 
+def normalize_ws(text: str):
+    return "\n".join(line.strip() for line in text.strip().split("\n"))
+
 def scrape_samples(url):
     requests_cache.install_cache(str(CACHE_PATH))
     cookies = browser_cookie3.firefox()
     soup = BeautifulSoup(get(url, cookies=cookies).content, features="html.parser")
     blocks = list(soup.find_all('pre'))
     inputs = ["\n".join(div.text for div in block.find_all('div')) for block in blocks[::2]]
-    outputs = [block.text.strip() for block in blocks[1::2]]
+    outputs = [normalize_ws(block.text) for block in blocks[1::2]]
     return [Test(f"Пример {i+1}", inputs[i], outputs[i]) for i in range(len(inputs))]
 
 def get_tests(source_path):
@@ -134,7 +137,7 @@ def run_tests(source_path):
                 encoding='utf-8',
                 timeout=2,
             )
-            output = result.stdout.strip()
+            output = normalize_ws(result.stdout)
             if output == test.output:
                 print("OK")
             else:
