@@ -93,8 +93,10 @@ def scrape_samples(url):
     requests_cache.install_cache(str(CACHE_PATH))
     cookies = browser_cookie3.firefox()
     soup = BeautifulSoup(get(url, cookies=cookies).content, features="html.parser")
-    blocks = [pre.text.strip() for pre in soup.find_all('pre')]
-    return [Test(f"Пример {i+1}", blocks[2*i], blocks[2*i+1]) for i in range(0, len(blocks)//2)]
+    blocks = list(soup.find_all('pre'))
+    inputs = ["\n".join(div.text for div in block.find_all('div')) for block in blocks[::2]]
+    outputs = [block.text.strip() for block in blocks[1::2]]
+    return [Test(f"Пример {i+1}", inputs[i], outputs[i]) for i in range(len(inputs))]
 
 def get_tests(source_path):
     try:
