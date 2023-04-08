@@ -129,6 +129,12 @@ def run_tests(source_path):
     if tests:
         for test in tests:
             print(test.name, end=": ")
+            if not test.input:
+                print(f"пустой ввод!")
+                continue
+            if not test.output:
+                print(f"пустой вывод!")
+                continue
             sys.stdout.flush()
             result = subprocess.run(
                 run_cmd.split(),
